@@ -17,7 +17,7 @@ config = configparser.ConfigParser()
 config.read('config/settings.ini')
 
 if config['bakerman_config']['doDebug'] in ["True", "true", "yes"]:
-    doDebug = True #enable verbose logging in /logs
+    doDebug = True
 else: doDebug = False
 
 LED_PIN = config['bakerman_config']['LED_PIN']
@@ -45,6 +45,7 @@ def run(i):
 
     cmd = i.replace("RUN ", "", 1)
     cmd = re.sub(pattern="\n", repl="", string=cmd)
+    cmd = "Keyboard.press(GUI_KEY);\nKeyboard.press('r');\nKeyboard.releaseAll;\ndelay(100);\nKeyboard.print(" + cmd + ");\nKeyboard.press(RETURN_KEY);\n"
 
 def text(i): 
 
