@@ -1,10 +1,10 @@
-# BAKERMAN v0.4 by Svjatoslav Skabarin; Release 09.01.2021
+# BAKERMAN v0.5 by Svjatoslav Skabarin; Release 09.01.2021
 
 # Designed for Doughscript v2.1, but as of v0.2, only LED, WAIT, TEXT classes are implemented
 # Doughskript syntax and functions: please reference ds_readme.txt
 
 import configparser
-import os.path
+import os
 import re
 import shutil
 import sys
@@ -12,6 +12,8 @@ import time
 from msvcrt import getch
 
 start_time = time.time()
+
+if not os.path.isdir("logs"): os.makedirs("logs")
 
 config = configparser.ConfigParser()
 config.read('config/settings.ini')
@@ -22,6 +24,8 @@ else: doDebug = False
 
 LED_PIN = config['bakerman_config']['LED_PIN']
 LED_PIN = re.sub(pattern="\n", repl="", string=LED_PIN)
+Button_PIN = config['bakerman_config']['Button_PIN']
+Button_PIN = re.sub(pattern="\n", repl="", string=Button_PIN)
 
 pretext = open("config/pretext.conf", "r") 
 posttext = open("config/posttext.conf", "r")
@@ -45,7 +49,9 @@ def run(i):
 
     cmd = i.replace("RUN ", "", 1)
     cmd = re.sub(pattern="\n", repl="", string=cmd)
+
     cmd = "Keyboard.press(GUI_KEY);\nKeyboard.press('r');\nKeyboard.releaseAll;\ndelay(100);\nKeyboard.print(" + cmd + ");\nKeyboard.press(RETURN_KEY);\n"
+    output.write(cmd)
 
 def text(i): 
 
@@ -84,7 +90,7 @@ def debugLog(log):
 
 print("\n\n                  BAKERMAN                   ")
 print("---------------------------------------------")
-print("Kooky Bakerman v0.4 -- using Doughskript v2.1\n\n")
+print("Kooky Bakerman v0.5 -- using Doughskript v2.1\n\n")
 
 debugLog("Programm initialized")
 
