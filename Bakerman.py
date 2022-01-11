@@ -1,7 +1,10 @@
-# BAKERMAN v0.5 by Svjatoslav Skabarin; Release 09.01.2021
+# BAKERMAN v0.5.1 by Svjatoslav Skabarin; Release 09.01.2021
 
 # Designed for Doughscript v2.1, but as of v0.2, only LED, WAIT, TEXT classes are implemented
 # Doughskript syntax and functions: please reference ds_readme.txt
+
+BAKERMAN_VERSION = "v0.5.1"
+DS_VERSION = "v2.1"
 
 import configparser
 import os
@@ -90,7 +93,7 @@ def debugLog(log):
 
 print("\n\n                  BAKERMAN                   ")
 print("---------------------------------------------")
-print("Kooky Bakerman v0.5 -- using Doughskript v2.1\n\n")
+print("Kooky Bakerman " + BAKERMAN_VERSION + " -- using Doughskript " + DS_VERSION + "\n\n")
 
 debugLog("Programm initialized")
 
