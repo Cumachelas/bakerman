@@ -13,7 +13,8 @@ s = [[GUI.Text("1) Assign an input file",
     [GUI.FileBrowse(button_text="Browse...",
                     file_types=(("Doughskript files", ".dough"), ("Text files", ".txt")),
                     button_color="black",
-                    font=(default_font, 12))],
+                    font=(default_font, 12),
+                    key="InputFileKey")],
     [GUI.Text()],
     [GUI.Submit(), GUI.Cancel()]]
 
@@ -28,4 +29,4 @@ event, values = firstWindow.read()
 
 firstWindow.close()
 
-print(values["textInput"])
+print(values["InputFileKey"])
