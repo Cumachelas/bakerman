@@ -1,9 +1,9 @@
-# BAKERMAN v0.5.1 by Svjatoslav Skabarin; Release 09.01.2021
+# BAKERMAN CLI v0.5.2 by Svjatoslav Skabarin; Release 13.01.2021
 
 # Designed for Doughscript v2.1, but as of v0.2, only LED, WAIT, TEXT classes are implemented
 # Doughskript syntax and functions: please reference ds_readme.txt
 
-BAKERMAN_VERSION = "v0.5.1"
+BAKERMAN_VERSION = "CLI v0.5.2"
 DS_VERSION = "v2.1"
 
 import configparser
@@ -86,10 +86,11 @@ def toggleLED():
     output.write(cmd)
 
 def debugLog(log):
+    
     if doDebug:
         timeDelta = time.time() - start_time
         log = str(round(timeDelta, 2)) + "s " + log + "\n"
-        logFile.write(log)   
+        logFile.write(log)
 
 print("\n\n                  BAKERMAN                   ")
 print("---------------------------------------------")
