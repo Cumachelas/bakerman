@@ -1,0 +1,4 @@
+{
+    "board": "digistump:avr:digispark-tiny",
+    "programmer": "digistump:micronucleusprog"
+}
