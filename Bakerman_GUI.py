@@ -1,10 +1,12 @@
-# BAKERMAN GUI v0.6 by Svjatoslav Skabarin; Release 13.01.2021
+# BAKERMAN GUI v0.7 by Svjatoslav Skabarin; Release 06.02.2022
 
-# Designed for Doughscript v2.1, but as of v0.2, only LED, WAIT, TEXT classes are implemented
+# Designed for Doughscript v3, but as of v0.7, only certain functions are implemented
 # Doughskript syntax and functions: please reference ds_readme.txt
 
-BAKERMAN_VERSION = "GUI v0.6"
-DS_VERSION = "v2.1"
+#Dependancies: InterfaceLayout.py, configparser, msvcrt, shutil, re, time -- TODO: Dep. installer
+
+BAKERMAN_VERSION = "v0.7 (w/BakeryGUI)"
+DS_VERSION = "v3"
 
 import configparser
 import os
@@ -32,7 +34,7 @@ def debugLog(log):
 config = configparser.ConfigParser()
 config.read('config/settings.ini')
 
-window = GUI.Window(title="BAKERMAN v0.5 (w/ Bakery front end)",
+window = GUI.Window(title="BAKERMAN " + BAKERMAN_VERSION,
                          element_justification = "left",
                          background_color="white",
                          layout=s, # from Bakery_GUI.py
@@ -65,10 +67,10 @@ if doDebug:
     LogFilePath = "logs/" + str(int(time.time())) + ".txt"
     logFile = open(LogFilePath, "a")
 
-LED_PIN = config['bakerman_config']['LED_PIN']
-LED_PIN = re.sub(pattern="\n", repl="", string=LED_PIN)
-Button_PIN = config['bakerman_config']['Button_PIN']
-Button_PIN = re.sub(pattern="\n", repl="", string=Button_PIN)
+LED_PIN = re.sub(pattern="\n", repl="", string=config['bakerman_config']['LED_PIN']) # CONFIG RECALL
+Button_PIN = re.sub(pattern="\n", repl="", string=config['bakerman_config']['Button_PIN'])
+
+#PRESS_CMD = TODO
 
 pretext = open("config/pretext.conf", "r") 
 posttext = open("config/posttext.conf", "r")
@@ -89,7 +91,7 @@ def run(i):
     cmd = i.replace("RUN ", "", 1)
     cmd = re.sub(pattern="\n", repl="", string=cmd)
 
-    cmd = "Keyboard.press(GUI_KEY);\nKeyboard.press('r');\nKeyboard.releaseAll;\ndelay(100);\nKeyboard.print(" + cmd + ");\nKeyboard.press(RETURN_KEY);\n"
+    cmd = "DigiKeyboard.sendKeyStroke(GUI_KEY);\nDigiKeyboard.println('r');\nKeyboard.releaseAll;\nDigiKeyboard.delay(100);\nDigiKeyboard.println(" + cmd + ");\nDigiKeyboard.sendKeyStroke(RETURN_KEY);\n"
     output.write(cmd)
 
 def text(i): 
@@ -97,7 +99,7 @@ def text(i):
     cmd = i.replace("TEXT ", "", 1)
     cmd = re.sub(pattern="\n", repl="", string=cmd)
 
-    cmd = "\tKeyboard.print(" + cmd + ");\n"
+    cmd = "\tDigiKeyboard.println(" + cmd + ");\n"
     output.write(cmd)
 
 def wait(i):
@@ -105,7 +107,7 @@ def wait(i):
     cmd = i.replace("WAIT ", "", 1)
     cmd = re.sub(pattern="\n", repl="", string=cmd)
 
-    cmd = "\tdelay(" + cmd + ");\n"
+    cmd = "\tDigiKeyboard.delay(" + cmd + ");\n"
     output.write(cmd)
 
 def toggleLED():
