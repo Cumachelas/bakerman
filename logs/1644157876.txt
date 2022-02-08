@@ -1,4 +1,0 @@
-65.08s Programm initialized
-65.08s File opened succesfully...
-65.08s File written successfully to C:/Users/svjat/Desktop/test1.ino
-65.08s Program finished

@@ -7,7 +7,7 @@ s = [[GUI.Text("Assign an input file",
                     background_color="white",
                     text_color="black")],
      
-    [GUI.Text("(any .txt or .dough file, written in DS v2.1)",
+    [GUI.Text("(any .txt or .dough file, written in DS v3 or older)",
                     font=(default_font, 12, "italic"),
                     background_color="white",
                     text_color="black")],
@@ -73,6 +73,22 @@ s = [[GUI.Text("Assign an input file",
                     background_color="white",
                     text_color="black")],
     
+    [GUI.Radio("German keyboard layout",
+                    group_id="RADIO_LAYOUT",
+                    key="GermanLayout",
+                    font=(default_font, 10),
+                    background_color="white",
+                    text_color="black",
+                    pad=((5,0),(25,2)))],
+       
+    [GUI.Radio("US keyboard layout",
+                    group_id="RADIO_LAYOUT",
+                    key="usLayout",
+                    font=(default_font, 10),
+                    background_color="white",
+                    text_color="black",
+                    pad=((3,0),(0,10)))],   
+       
     [GUI.VerticalSeparator(pad=(0, 5), color="white")],
     
     [GUI.Text("Log",
@@ -87,7 +103,8 @@ s = [[GUI.Text("Assign an input file",
                     font=(default_font, 12),
                     background_color="white",
                     text_color="black",
-                    disabled=True)],
+                    disabled=True,
+                    reroute_stdout=True)],
     ]
 
 

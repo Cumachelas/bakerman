@@ -1,11 +1,11 @@
-# BAKERMAN GUI v0.7 by Svjatoslav Skabarin; Release 06.02.2022
+# BAKERMAN GUI v1.0 by Svjatoslav Skabarin; Release 08.02.2022
 
-# Designed for Doughscript v3, but as of v0.7, only certain functions are implemented
+# Designed for Doughscript v3, but as of v1.0, only certain functions are implemented
 # Doughskript syntax and functions: please reference ds_readme.txt
 
-#Dependancies: InterfaceLayout.py, configparser, msvcrt, shutil, re, time -- TODO: Dep. installer
+#Dependencies: InterfaceLayout.py, configparser, shutil, pysimplegui --- install with dep_install.py
 
-BAKERMAN_VERSION = "v0.7 (w/BakeryGUI)"
+BAKERMAN_VERSION = "v1.0 (w/BakeryGUI)"
 DS_VERSION = "v3"
 
 import configparser
@@ -14,22 +14,26 @@ import re
 import shutil
 import sys
 import time
-from msvcrt import getch
+#from msvcrt import getch
 
 import PySimpleGUI as GUI
 from PySimpleGUI.PySimpleGUI import WIN_CLOSED
 
 from InterfaceLayout import s, default_font
 
+q = '"'
+
 start_time = time.time()
 
-doDebug = False # default, changing
+doDebug = False
+headerPresent = False
 
 def debugLog(log):
     if doDebug:
         timeDelta = time.time() - start_time
         log = str(round(timeDelta, 2)) + "s " + log + "\n"
         logFile.write(log)   
+        sys.stdout.write(log + "\n")
 
 config = configparser.ConfigParser()
 config.read('config/settings.ini')
@@ -40,7 +44,7 @@ window = GUI.Window(title="BAKERMAN " + BAKERMAN_VERSION,
                          layout=s, # from Bakery_GUI.py
                          icon=("assets/bakerman_icon_v1.ico"))
 
-while True:
+while True: #input/Window loop
 
     event, value = window.read()
     
@@ -60,27 +64,27 @@ while True:
         window.close()
         exit(0)
 
-if doDebug:
+if doDebug: #debug setup
     
     if not os.path.isdir("logs"): os.makedirs("logs")
     
     LogFilePath = "logs/" + str(int(time.time())) + ".txt"
     logFile = open(LogFilePath, "a")
 
-LED_PIN = re.sub(pattern="\n", repl="", string=config['bakerman_config']['LED_PIN']) # CONFIG RECALL
+LED_PIN = re.sub(pattern="\n", repl="", string=config['bakerman_config']['LED_PIN']) #CONFIG RECALL
 Button_PIN = re.sub(pattern="\n", repl="", string=config['bakerman_config']['Button_PIN'])
+INO_BOOTTIME = int(re.sub(pattern="\n", repl="", string=config['bakerman_config']['INO_BOOTTIME']))
+LAYOUT = re.sub(pattern="\n", repl="", string=config['bakerman_config']['LAYOUT'])
 
-#PRESS_CMD = TODO
-
-pretext = open("config/pretext.conf", "r") 
+pretext = "#define kbd_" + LAYOUT + "\n#include<DigiKeyboard.h>\n\nvoid setup(){\n\n"
 posttext = open("config/posttext.conf", "r")
 
-output = open("temp/cache.ino", "w")
+output = open(OutputFilePath, "w")
 output.write("")
-output = open("temp/cache.ino", "a") # TEMP - temp/write.temp
+output = open(OutputFilePath, "a") #TEMP - temp/write.temp
 
 DoughLineCount = 0
-line = 0
+line = 1
 LED_ON = False
 errorstate = False
 
@@ -91,7 +95,7 @@ def run(i):
     cmd = i.replace("RUN ", "", 1)
     cmd = re.sub(pattern="\n", repl="", string=cmd)
 
-    cmd = "DigiKeyboard.sendKeyStroke(GUI_KEY);\nDigiKeyboard.println('r');\nKeyboard.releaseAll;\nDigiKeyboard.delay(100);\nDigiKeyboard.println(" + cmd + ");\nDigiKeyboard.sendKeyStroke(RETURN_KEY);\n"
+    cmd = "\n\tDigiKeyboard.sendKeyStroke(KEY_GUI); //RUN\n\tDigiKeyboard.println(" + q + "r" + q + ");\n\tKeyboard.releaseAll;\n\tDigiKeyboard.delay(100);\n\tDigiKeyboard.println(" + q + cmd + q + ");\n\tDigiKeyboard.sendKeyStroke(KEY_RETURN);\n"
     output.write(cmd)
 
 def text(i): 
@@ -104,10 +108,9 @@ def text(i):
 
 def wait(i):
 
-    cmd = i.replace("WAIT ", "", 1)
-    cmd = re.sub(pattern="\n", repl="", string=cmd)
+    wait_time = int(i.replace("WAIT ", "", 1))
 
-    cmd = "\tDigiKeyboard.delay(" + cmd + ");\n"
+    cmd = "\tDigiKeyboard.delay(" + str(wait_time*1000) + ");\n"
     output.write(cmd)
 
 def toggleLED():
@@ -122,33 +125,63 @@ def toggleLED():
         LED_ON = not LED_ON
 
     output.write(cmd)
-        
+
+def key(i):
+    
+    if "ENTER" in i or "RETURN" in i:
+        output.write("\tDigiKeyboard.sendKeyStroke(" + q + "KEY_RETURN" + q + ");\n")
+    elif "GUI" in i or "WIN" in i:
+        output.write("\tDigiKeyboard.sendKeyStroke(" + q + "KEY_GUI" + q + ");\n")
+    else:
+        debugLog("KEY: Invalid key token")
+        errorstate = True
+            
 #############################################################
 
 debugLog("Programm initialized")
 
-dough = open(InputFilePath)
+try:
+    dough = open(InputFilePath)
+except FileNotFoundError:
+    debugLog("Source file not found")
+    errorstate = True
+    cmd_list = ["0"] #making sure, that STARTDELAY has a list to check
+else:
+    debugLog("File opened succesfully...")
+    cmd_list = dough.readlines()
+    totalLines = list.__len__(cmd_list)
+    output.write(pretext)
 
-debugLog("File opened succesfully...")
-
-cmd_list = dough.readlines()
-totalLines = list.__len__(cmd_list)
-
-output.write(pretext.read())
-
+if "STARTDELAY" in cmd_list[0] and not errorstate: #header-init
+    
+    debugLog("STARTDELAY-header found")
+    headerPresent = True
+    
+    startdelay = int(cmd_list[0].replace("STARTDELAY ", "", 1))
+    output.write("\tdelay(" + str(startdelay-INO_BOOTTIME) + "); // STARTDELAY\n")
+    
 for i in cmd_list: #execution loop
+    
+    if errorstate: break
 
-    if "BREAK" in i:
+    if headerPresent and i == cmd_list[0]: pass
+    
+    elif "BREAK" in i:
         debugLog("BREAK called, stopped encoding")
         break
 
     elif "LED" in i: toggleLED()
+    
+    elif "KEY" in i: key(i)
         
     elif "TEXT" in i: text(i)
     
     elif "WAIT" in i: wait(i)
 
     elif "RUN" in i: run(i)
+    
+    elif "STARTDELAY" in i:
+        debugLog("STARTDELAY encountered out of header, ignoring")
 
     else:
         debugLog("Unknown command in line " + str(line) + ". Quitting")
@@ -160,19 +193,19 @@ for i in cmd_list: #execution loop
 output.write(posttext.read())
 
 if errorstate:
+    
+    error = sys.exc_info()[1]
+    
+    if os.path.isfile(OutputFilePath): os.remove(OutputFilePath)
+    
+    GUI.Popup(title="Error encountered")
     exit(0)
-    
-try:
-    shutil.copyfile("temp/write.temp", OutputFilePath.encode('unicode_escape'))
-except Exception as e:
-    debugLog("Shutil copy failed with " + str(e))
-    
-    
+
+      
 debugLog("File written successfully to " + OutputFilePath)
 
 debugLog("Program finished")
 
 output.close()
-pretext.close()
 posttext.close()
 logFile.close()

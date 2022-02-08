@@ -1,6 +1,11 @@
 STARTDELAY 10
 LED
+RUN notepad.exe
+WAIT 1
 TEXT "Rickroll!"
 WAIT 5
 KEY ENTER
+LED
+WAIT 3
+RUN cmd.exe
 BREAK
