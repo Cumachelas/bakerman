@@ -1,6 +1,9 @@
 **Kooky Bakerman by @Cumachelas**
 
 
+DON'T USE THE EXECUTABLE DISTRIBUTION YET! 
+_(testing purposes only)_
+
 
 Installation and use:
   
