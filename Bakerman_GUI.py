@@ -1,20 +1,21 @@
-# BAKERMAN GUI v1.0 by Svjatoslav Skabarin; Release 08.02.2022
+# BAKERMAN GUI v1.0.1 by Svjatoslav Skabarin; Release 09.02.2022
 
 # Designed for Doughscript v3, but as of v1.0, only certain functions are implemented
 # Doughskript syntax and functions: please reference ds_readme.txt
 
-#Dependencies: InterfaceLayout.py, configparser, shutil, pysimplegui --- install with dep_install.py
+# Dependencies: InterfaceLayout.py, configparser, shutil, pysimplegui --- install with dep_install.py
 
-BAKERMAN_VERSION = "v1.0 (w/BakeryGUI)"
+BAKERMAN_VERSION = "v1.0.1 (w/BakeryGUI)"
 DS_VERSION = "v3"
 
 import configparser
+import math
 import os
 import re
 import shutil
 import sys
 import time
-#from msvcrt import getch
+#from msvcrt import getch # - deprecated
 
 import PySimpleGUI as GUI
 from PySimpleGUI.PySimpleGUI import WIN_CLOSED
@@ -32,8 +33,8 @@ def debugLog(log):
     if doDebug:
         timeDelta = time.time() - start_time
         log = str(round(timeDelta, 2)) + "s " + log + "\n"
-        logFile.write(log)   
-        sys.stdout.write(log + "\n")
+        logFile.write(log)
+        #sys.stdout.write(log + "\n") # - deprecated
 
 config = configparser.ConfigParser()
 config.read('config/settings.ini')
@@ -54,8 +55,12 @@ while True: #input/Window loop
         OutputFilePath = str(value["OutputFilePath"])
         
         VerifyExecutionTimings = value["VerifyExecutionTimings"]
-        doDebug = value["doDebug"] # fully-functional
-        EnableVerboseLogging = value["EnableVerboseLogging"]
+        doDebug = value["doDebug"]
+        OpenArduino = value["OpenArduino"]
+        INO_BOOTTIME = float(value["BootHeaderTime"])
+        LED_PIN = value["LedPin"]
+        BUTTON_PIN = int(value["ButtonPin"])
+        LAYOUT = value["KeyboardLayout"]
         
         break
         
@@ -71,12 +76,11 @@ if doDebug: #debug setup
     LogFilePath = "logs/" + str(int(time.time())) + ".txt"
     logFile = open(LogFilePath, "a")
 
-LED_PIN = re.sub(pattern="\n", repl="", string=config['bakerman_config']['LED_PIN']) #CONFIG RECALL
-Button_PIN = re.sub(pattern="\n", repl="", string=config['bakerman_config']['Button_PIN'])
-INO_BOOTTIME = int(re.sub(pattern="\n", repl="", string=config['bakerman_config']['INO_BOOTTIME']))
-LAYOUT = re.sub(pattern="\n", repl="", string=config['bakerman_config']['LAYOUT'])
+if LAYOUT == "German": LAYOUT_STR = "de_de"
+if LAYOUT == "English": LAYOUT_STR = "en_us"
+else: LAYOUT_STR = "de_de"
 
-pretext = "#define kbd_" + LAYOUT + "\n#include<DigiKeyboard.h>\n\nvoid setup(){\n\n"
+pretext = "#define kbd_" + LAYOUT_STR + "\n#include<DigiKeyboard.h>\n\nvoid setup(){\n\n"
 posttext = open("config/posttext.conf", "r")
 
 output = open(OutputFilePath, "w")
@@ -95,7 +99,7 @@ def run(i):
     cmd = i.replace("RUN ", "", 1)
     cmd = re.sub(pattern="\n", repl="", string=cmd)
 
-    cmd = "\n\tDigiKeyboard.sendKeyStroke(KEY_GUI); //RUN\n\tDigiKeyboard.println(" + q + "r" + q + ");\n\tKeyboard.releaseAll;\n\tDigiKeyboard.delay(100);\n\tDigiKeyboard.println(" + q + cmd + q + ");\n\tDigiKeyboard.sendKeyStroke(KEY_RETURN);\n"
+    cmd = "\n\tDigiKeyboard.sendKeyStroke(KEY_GUI); //RUN\n\tDigiKeyboard.println(" + q + "r" + q + ");\n\tKeyboard.releaseAll;\n\tDigiKeyboard.delay(100);\n\tDigiKeyboard.println(" + q + cmd + q + ");\n\tDigiKeyboard.sendKeyStroke(KEY_RETURN);\n\n"
     output.write(cmd)
 
 def text(i): 
@@ -158,7 +162,9 @@ if "STARTDELAY" in cmd_list[0] and not errorstate: #header-init
     headerPresent = True
     
     startdelay = int(cmd_list[0].replace("STARTDELAY ", "", 1))
-    output.write("\tdelay(" + str(startdelay-INO_BOOTTIME) + "); // STARTDELAY\n")
+    startdelay = startdelay-INO_BOOTTIME
+    
+    output.write("\tdelay(" + str(math.floor(startdelay*1000)) + "); // STARTDELAY\n")
     
 for i in cmd_list: #execution loop
     
@@ -206,6 +212,6 @@ debugLog("File written successfully to " + OutputFilePath)
 
 debugLog("Program finished")
 
+if doDebug: logFile.close()
 output.close()
 posttext.close()
-logFile.close()

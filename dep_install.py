@@ -2,7 +2,6 @@ import subprocess as sub
 import time
 
 dependencies = ["configparser",
-                "getch",
                 "pytest-shutil",
                 "pysimplegui"]
 

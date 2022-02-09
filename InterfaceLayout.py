@@ -45,6 +45,57 @@ s = [[GUI.Text("Assign an input file",
                     background_color="white",
                     text_color="black")],
     
+    [GUI.VerticalSeparator(pad=(0, 3), color="white")],
+    
+    [GUI.Text("Boot header time:",
+                    font=(default_font, 8),
+                    background_color="white",
+                    text_color="black"),
+     
+    GUI.Input(key="BootHeaderTime",
+              default_text="6.2",
+              font=(default_font, 10),
+              size=(4, 1),
+              pad=((0, 10), (0, 0))),
+    
+    GUI.Text("LED Pin:",
+                    font=(default_font, 8),
+                    background_color="white",
+                    text_color="black"),
+     
+    GUI.Input(key="LedPin",
+              default_text="1",
+              font=(default_font, 10),
+              size=(4, 1),
+              pad=((0, 10), (0, 0))),
+    
+    GUI.Text("Button pin:",
+                    font=(default_font, 8),
+                    background_color="white",
+                    text_color="black"),
+     
+    GUI.Input(key="ButtonPin",
+              default_text="2",
+              font=(default_font, 10),
+              size=(4, 1),
+              pad=((0, 10), (0, 0))),
+    
+    GUI.Text("Layout:",
+                    font=(default_font, 8),
+                    background_color="white",
+                    text_color="black"),
+    
+    GUI.Combo(values=["German", "English"],
+                default_value="German",
+                background_color="white",
+                button_background_color="white",
+                button_arrow_color="black",
+                font=(default_font, 10),
+                auto_size_text=True,
+                key="KeyboardLayout")],
+    
+    [GUI.VerticalSeparator(pad=(0, 3), color="white")],
+    
     [GUI.Checkbox("Verify execution timings",
                     key="VerifyExecutionTimings",
                     font=(default_font, 10),
@@ -53,6 +104,7 @@ s = [[GUI.Text("Assign an input file",
     
     [GUI.Checkbox("Create log files",
                     key="doDebug", # see settings.ini
+                    default=True,
                     font=(default_font, 10),
                     background_color="white",
                     text_color="black"),
@@ -67,44 +119,14 @@ s = [[GUI.Text("Assign an input file",
                     button_color="black",
                     font=(default_font, 12))],
     
-    [GUI.Checkbox("Verbose logging/Debug",
-                    key="EnableVerboseLogging",
+    [GUI.Checkbox("Auto-open Arduino IDE on completion",
+                    key="OpenArduino",
                     font=(default_font, 10),
                     background_color="white",
-                    text_color="black")],
-    
-    [GUI.Radio("German keyboard layout",
-                    group_id="RADIO_LAYOUT",
-                    key="GermanLayout",
-                    font=(default_font, 10),
-                    background_color="white",
-                    text_color="black",
-                    pad=((5,0),(25,2)))],
+                    text_color="black")], 
        
-    [GUI.Radio("US keyboard layout",
-                    group_id="RADIO_LAYOUT",
-                    key="usLayout",
-                    font=(default_font, 10),
-                    background_color="white",
-                    text_color="black",
-                    pad=((3,0),(0,10)))],   
-       
-    [GUI.VerticalSeparator(pad=(0, 5), color="white")],
-    
-    [GUI.Text("Log",
-                    font=(default_font, 12, "bold"),
-                    background_color="white",
-                    text_color="black")],
-    
-    [GUI.VerticalSeparator(pad=(0, 5), color="white")],
-    
-    [GUI.Multiline(key="logBox",
-                    size=(50, 12),
-                    font=(default_font, 12),
-                    background_color="white",
-                    text_color="black",
-                    disabled=True,
-                    reroute_stdout=True)],
+    [GUI.VerticalSeparator(pad=(0, 5), color="white")]
+
     ]
 
 

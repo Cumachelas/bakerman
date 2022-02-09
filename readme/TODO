@@ -1,5 +1,0 @@
-5. Transfer settings.ini functionality to GUI
-6. Hide cmd window when executing Bakerman_GUI.py
-7. Get rid of Bakerman_CLI.py
-8. Update DS_readme.txt
-9. Get rid of the getch dependency
