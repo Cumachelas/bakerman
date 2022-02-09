@@ -1,6 +1,9 @@
 **Kooky Bakerman by @Cumachelas**
 
 
+DON'T USE THE EXECUTABLE DISTRIBUTION YET! 
+_(testing purposes only)_
+
 
 Installation and use:
   
@@ -18,3 +21,5 @@ Use with Digispark (16MHz):
   5. Select the correct board and the micronucleus programmer
   6. Upload the generated .ino file and THEN plug in your board (you will see a prompt from micronucleus)
   7. Have fun!
+
+NOTE: When using dep_install.py, you will get a failed pip install of getch. This library isn't needed anymore and isn't an issue.
