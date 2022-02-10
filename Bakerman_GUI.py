@@ -1,11 +1,11 @@
-# BAKERMAN GUI v1.0.1 by Svjatoslav Skabarin; Release 09.02.2022
+# BAKERMAN GUI v1.1.0 by Svjatoslav Skabarin; Release 10.02.2022
 
-# Designed for Doughscript v3, but as of v1.0, only certain functions are implemented
+# Designed for Doughscript v3, but as of v1.1.0, only certain functions are implemented
 # Doughskript syntax and functions: please reference ds_readme.txt
 
 # Dependencies: InterfaceLayout.py, configparser, shutil, pysimplegui --- install with dep_install.py
 
-BAKERMAN_VERSION = "v1.0.1 (w/BakeryGUI)"
+BAKERMAN_VERSION = "v1.1.0 (w/BakeryGUI)"
 DS_VERSION = "v3"
 
 import configparser
