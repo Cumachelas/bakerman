@@ -1,4 +1,6 @@
 {
     "board": "digistump:avr:digispark-tiny",
-    "programmer": "digistump:micronucleusprog"
+    "programmer": "digistump:micronucleusprog",
+    "sketch": "testing\\ardu.ino",
+    "port": "COM1"
 }

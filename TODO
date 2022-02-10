@@ -1,6 +1,4 @@
-5. Transfer settings.ini functionality to GUI
 6. Hide cmd window when executing Bakerman_GUI.py
-8. Update DS_readme.txt
-10. Check for the header time being larger than the asked STARTDELAY
+
 
 V1.2 -> implement GUI runtime, add convertino(_allparams_) function

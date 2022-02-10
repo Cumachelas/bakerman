@@ -6,8 +6,10 @@ WAIT "_int_" [s]
 LED
 
 TEXT "_string_"
-KEY "_key_"
+PRINTLN "_string_" - includes std_delay, but for loading apps, add extra
 
-RUN "_command_"
+KEY "_key_" - either standard key names, or shortcuts like WIN, CTRL, etc
+
+RUN "_command_" - includes std_delay, but for loading apps, add extra
 BATCH "_path_"
 

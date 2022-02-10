@@ -9,6 +9,7 @@ BAKERMAN_VERSION = "v1.0.1 (w/BakeryGUI)"
 DS_VERSION = "v3"
 
 import configparser
+import subprocess as sub
 import math
 import os
 import re
@@ -35,6 +36,15 @@ def debugLog(log):
         log = str(round(timeDelta, 2)) + "s " + log + "\n"
         logFile.write(log)
         #sys.stdout.write(log + "\n") # - deprecated
+        
+def forGerman(string):
+    debugLog("Coverting to German LAYOUT")
+    string_rep = string.replace("/", "&")
+    string_rep = string_rep.replace(":", ">")
+    string_rep = string_rep.replace("y", "|")
+    string_rep = string_rep.replace("z", "y")
+    string_rep = string_rep.replace("|", "z")
+    return string_rep
 
 config = configparser.ConfigParser()
 config.read('config/settings.ini')
@@ -56,11 +66,19 @@ while True: #input/Window loop
         
         VerifyExecutionTimings = value["VerifyExecutionTimings"]
         doDebug = value["doDebug"]
-        OpenArduino = value["OpenArduino"]
+        SEAMLESS_MODE = value["SeamlessMode"]
+        
         INO_BOOTTIME = float(value["BootHeaderTime"])
-        LED_PIN = value["LedPin"]
+        if INO_BOOTTIME < 0: INO_BOOTTIME = 0
+        
+        LED_PIN = int(value["LedPin"])
+        if LED_PIN < 1: LED_PIN = 1 #hard-default
+        
         BUTTON_PIN = int(value["ButtonPin"])
+        if BUTTON_PIN < 1: BUTTON_PIN = 2 #hard-default
+        
         LAYOUT = value["KeyboardLayout"]
+        std_delay = int(value["ExecutionTiming"])
         
         break
         
@@ -76,16 +94,12 @@ if doDebug: #debug setup
     LogFilePath = "logs/" + str(int(time.time())) + ".txt"
     logFile = open(LogFilePath, "a")
 
-if LAYOUT == "German": LAYOUT_STR = "de_de"
-if LAYOUT == "English": LAYOUT_STR = "en_us"
-else: LAYOUT_STR = "de_de"
-
-pretext = "#define kbd_" + LAYOUT_STR + "\n#include<DigiKeyboard.h>\n\nvoid setup(){\n\n"
+pretext = "#include<DigiKeyboard.h>\n\nvoid setup(){\n\n"
 posttext = open("config/posttext.conf", "r")
 
 output = open(OutputFilePath, "w")
 output.write("")
-output = open(OutputFilePath, "a") #TEMP - temp/write.temp
+output = open(OutputFilePath, "a")
 
 DoughLineCount = 0
 line = 1
@@ -99,23 +113,28 @@ def run(i):
     cmd = i.replace("RUN ", "", 1)
     cmd = re.sub(pattern="\n", repl="", string=cmd)
 
-    cmd = "\n\tDigiKeyboard.sendKeyStroke(KEY_GUI); //RUN\n\tDigiKeyboard.println(" + q + "r" + q + ");\n\tKeyboard.releaseAll;\n\tDigiKeyboard.delay(100);\n\tDigiKeyboard.println(" + q + cmd + q + ");\n\tDigiKeyboard.sendKeyStroke(KEY_RETURN);\n\n"
-    
+    cmd = "\tDigiKeyboard.sendKeyStroke(KEY_R,MOD_GUI_LEFT); //RUN\n\tDigiKeyboard.delay(" + str(std_delay) + ");\n\tDigiKeyboard.print(" + q + forGerman(cmd) + q + ");\n\tDigiKeyboard.sendKeyStroke(KEY_ENTER);\n\tDigiKeyboard.delay(" + str(std_delay) + ");\n\n"
     output.write(cmd)
 
 def text(i): 
 
-    cmd = i.replace("TEXT ", "", 1)
+    cmd = i.replace("PRINT ", "", 1)
     cmd = re.sub(pattern="\n", repl="", string=cmd)
 
-    cmd = "\tDigiKeyboard.println(" + cmd + ");\n"
-    output.write(cmd)
+    output.write("\tDigiKeyboard.print(" + q + forGerman(cmd) + q + "); //PRINT\n\n")
+    
+def textln(i): 
+
+    cmd = i.replace("PRINTLN ", "", 1)
+    cmd = re.sub(pattern="\n", repl="", string=cmd)
+
+    output.write("\tDigiKeyboard.println(" + q +  forGerman(cmd) + q + "); //PRINTLN\n\tDigiKeyboard.delay(" + str(std_delay) + ");\n\n")
 
 def wait(i):
 
     wait_time = int(i.replace("WAIT ", "", 1))
 
-    cmd = "\tDigiKeyboard.delay(" + str(wait_time*1000) + ");\n"
+    cmd = "\tDigiKeyboard.delay(" + str(wait_time*1000) + "); //WAIT\n\n"
     output.write(cmd)
 
 def toggleLED():
@@ -123,23 +142,29 @@ def toggleLED():
     global LED_ON
 
     if LED_ON:
-        cmd = "\tdigitalWrite(" + LED_PIN + ", LOW);\n"
+        cmd = "\tdigitalWrite(" + str(LED_PIN) + ", LOW); //LED ON\n\n"
         LED_ON = not LED_ON
     elif not LED_ON:
-        cmd = "\tdigitalWrite(" + LED_PIN + ", HIGH);\n"
+        cmd = "\tdigitalWrite(" + str(LED_PIN) + ", HIGH); //LED OFF\n\n"
         LED_ON = not LED_ON
 
     output.write(cmd)
 
 def key(i):
     
+    cmd = i.replace("KEY ", "", 1)
+    cmd = re.sub(pattern="\n", repl="", string=cmd)
+    
     if "ENTER" in i or "RETURN" in i:
-        output.write("\tDigiKeyboard.sendKeyStroke(" + q + "KEY_RETURN" + q + ");\n")
+        output.write("\tDigiKeyboard.sendKeyStroke(KEY_ENTER);\n\n")
     elif "GUI" in i or "WIN" in i:
-        output.write("\tDigiKeyboard.sendKeyStroke(" + q + "KEY_GUI" + q + ");\n")
+        output.write("\tDigiKeyboard.sendKeyStroke(MOD_GUI_LEFT);\n\n")
     else:
-        debugLog("KEY: Invalid key token")
-        errorstate = True
+        output.write("\tDigiKeyboard.sendKeyStroke(" + cmd + ");\n\n")
+        
+def close():
+    
+    output.write("\tDigiKeyboard.sendKeyStroke(KEY_F4, MOD_ALT_LEFT); //CLOSE\n\n")
             
 #############################################################
 
@@ -165,7 +190,7 @@ if "STARTDELAY" in cmd_list[0] and not errorstate: #header-init
     startdelay = int(cmd_list[0].replace("STARTDELAY ", "", 1))
     startdelay = startdelay-INO_BOOTTIME
     
-    output.write("\tdelay(" + str(math.floor(startdelay*1000)) + "); // STARTDELAY\n")
+    if startdelay > 0: output.write("\tdelay(" + str(math.floor(startdelay*1000)) + "); // STARTDELAY\n")
     
 for i in cmd_list: #execution loop
     
@@ -180,12 +205,16 @@ for i in cmd_list: #execution loop
     elif "LED" in i: toggleLED()
     
     elif "KEY" in i: key(i)
-        
-    elif "TEXT" in i: text(i)
+    
+    elif "PRINTLN" in i: textln(i)
+    
+    elif "PRINT" in i: text(i)
     
     elif "WAIT" in i: wait(i)
 
     elif "RUN" in i: run(i)
+    
+    elif "CLOSE" in i: close()
     
     elif "STARTDELAY" in i:
         debugLog("STARTDELAY encountered out of header, ignoring")
@@ -199,6 +228,9 @@ for i in cmd_list: #execution loop
 
 output.write(posttext.read())
 
+output.close()
+posttext.close()
+
 if errorstate:
     
     error = sys.exc_info()[1]
@@ -208,11 +240,13 @@ if errorstate:
     GUI.Popup(title="Error encountered")
     exit(0)
 
-      
-debugLog("File written successfully to " + OutputFilePath)
-
-debugLog("Program finished")
+SeamlessOutputFilePath = OutputFilePath.replace(os.path.basename(OutputFilePath), "") + os.path.basename(OutputFilePath).replace(".ino", "") + "/" + os.path.basename(OutputFilePath)
+if SEAMLESS_MODE:
+    os.mkdir(OutputFilePath.replace(os.path.basename(OutputFilePath), "") + os.path.basename(OutputFilePath).replace(".ino", ""))
+    shutil.move(OutputFilePath, SeamlessOutputFilePath)
+    debugLog("Seamless mode - opening IDE")
+    os.startfile(SeamlessOutputFilePath)
+    
+debugLog("File written successfully to " + SeamlessOutputFilePath)
 
 if doDebug: logFile.close()
-output.close()
-posttext.close()
