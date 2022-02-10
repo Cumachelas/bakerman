@@ -99,9 +99,7 @@ def run(i):
     cmd = i.replace("RUN ", "", 1)
     cmd = re.sub(pattern="\n", repl="", string=cmd)
 
-    cmd = "\n\tDigiKeyboard.sendKeyStroke(KEY_GUI); //RUN\n\tDigiKeyboard.println("
-    + q + "r" + q + ");\n\tKeyboard.releaseAll;\n\tDigiKeyboard.delay(100);\n\tDigiKeyboard.println("
-    + q + cmd + q + ");\n\tDigiKeyboard.sendKeyStroke(KEY_RETURN);\n\n"
+    cmd = "\n\tDigiKeyboard.sendKeyStroke(KEY_GUI); //RUN\n\tDigiKeyboard.println(" + q + "r" + q + ");\n\tKeyboard.releaseAll;\n\tDigiKeyboard.delay(100);\n\tDigiKeyboard.println(" + q + cmd + q + ");\n\tDigiKeyboard.sendKeyStroke(KEY_RETURN);\n\n"
     
     output.write(cmd)
 
