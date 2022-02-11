@@ -16,7 +16,6 @@ import re
 import shutil
 import sys
 import time
-#from msvcrt import getch # - deprecated
 
 import PySimpleGUI as GUI
 from PySimpleGUI.PySimpleGUI import WIN_CLOSED
@@ -35,10 +34,8 @@ def debugLog(log):
         timeDelta = time.time() - start_time
         log = str(round(timeDelta, 2)) + "s " + log + "\n"
         logFile.write(log)
-        #sys.stdout.write(log + "\n") # - deprecated
         
 def forGerman(string):
-    debugLog("Coverting to German LAYOUT")
     string_rep = string.replace("/", "&")
     string_rep = string_rep.replace(":", ">")
     string_rep = string_rep.replace("y", "|")
@@ -67,6 +64,7 @@ while True: #input/Window loop
         VerifyExecutionTimings = value["VerifyExecutionTimings"]
         doDebug = value["doDebug"]
         SEAMLESS_MODE = value["SeamlessMode"]
+        INITIALIZE = value["InitializeKeystroke"]
         
         INO_BOOTTIME = float(value["BootHeaderTime"])
         if INO_BOOTTIME < 0: INO_BOOTTIME = 0
@@ -78,7 +76,9 @@ while True: #input/Window loop
         if BUTTON_PIN < 1: BUTTON_PIN = 2 #hard-default
         
         LAYOUT = value["KeyboardLayout"]
+        
         std_delay = int(value["ExecutionTiming"])
+        if std_delay < 48: std_delay = 50
         
         break
         
@@ -162,6 +162,11 @@ def key(i):
     else:
         output.write("\tDigiKeyboard.sendKeyStroke(" + cmd + ");\n\n")
         
+def comment(i):
+    
+    cmd = i.replace("&& ", "", 1)
+    output.write("\t// " + re.sub(pattern="\n", repl="", string=cmd) + "\n\n")
+     
 def close():
     
     output.write("\tDigiKeyboard.sendKeyStroke(KEY_F4, MOD_ALT_LEFT); //CLOSE\n\n")
@@ -190,13 +195,17 @@ if "STARTDELAY" in cmd_list[0] and not errorstate: #header-init
     startdelay = int(cmd_list[0].replace("STARTDELAY ", "", 1))
     startdelay = startdelay-INO_BOOTTIME
     
-    if startdelay > 0: output.write("\tdelay(" + str(math.floor(startdelay*1000)) + "); // STARTDELAY\n")
+    if startdelay > 0: output.write("\tdelay(" + str(math.floor(startdelay*1000)) + "); // STARTDELAY\n\n")
+    
+if INITIALIZE and not errorstate: output.write("\tDigiKeyboard.sendKeyStroke(0);\n\n")
     
 for i in cmd_list: #execution loop
     
     if errorstate: break
 
     if headerPresent and i == cmd_list[0]: pass
+    
+    elif "&&" in i: comment(i)
     
     elif "BREAK" in i:
         debugLog("BREAK called, stopped encoding")

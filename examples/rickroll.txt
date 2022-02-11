@@ -1,3 +1,7 @@
-STARTDELAY 15
+&& Rickroll 1 - 11.02.2022
+WAIT 10
+LED
+WAIT 5
+LED
 RUN https://cutt.ly/qeui
 BREAK
