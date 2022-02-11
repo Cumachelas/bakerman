@@ -115,7 +115,11 @@ def run(i):
 
     cmd = "\tDigiKeyboard.sendKeyStroke(KEY_R,MOD_GUI_LEFT); //RUN\n\tDigiKeyboard.delay(" + str(std_delay) + ");\n\tDigiKeyboard.print(" + q + forGerman(cmd) + q + ");\n\tDigiKeyboard.sendKeyStroke(KEY_ENTER);\n\tDigiKeyboard.delay(" + str(std_delay) + ");\n\n"
     output.write(cmd)
-
+    
+def desktop(): output.write("\tDigiKeyboard.sendKeyStroke(KEY_D,MOD_GUI_LEFT); //DESKTOP\n\tDigiKeyboard.delay(" + str(std_delay) + ");\n\n")
+    
+def prtsc(): output.write("\tDigiKeyboard.sendKeyStroke(KEY_D,MOD_GUI_LEFT); //DESKTOP\n\tDigiKeyboard.delay(" + str(std_delay) + ");\n\n") 
+    
 def text(i): 
 
     cmd = i.replace("PRINT ", "", 1)
@@ -205,6 +209,8 @@ for i in cmd_list: #execution loop
 
     if headerPresent and i == cmd_list[0]: pass
     
+    elif i == "" or i == "/n": pass
+    
     elif "&&" in i: comment(i)
     
     elif "BREAK" in i:
@@ -220,6 +226,8 @@ for i in cmd_list: #execution loop
     elif "PRINT" in i: text(i)
     
     elif "WAIT" in i: wait(i)
+    
+    elif "DESKTOP" in i: desktop()
 
     elif "RUN" in i: run(i)
     
