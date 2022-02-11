@@ -1,4 +1,5 @@
-6. Hide cmd window when executing Bakerman_GUI.py
+6. Hide cmd window when executing Bakerman_GUI.py - .pyw
+7. CHROME
 
 
 V1.2 -> implement GUI runtime, add convertino(_allparams_) function
