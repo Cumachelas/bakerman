@@ -1,0 +1,32 @@
+&& Wallpaper Printscreen - 12.02.2021
+&& Takes a screenshot of the desktop, selects it as wallpaper and hides all icons 
+&& Executes in under 4 seconds (tested on 220ms execution timing)
+
+LED
+
+DESKTOP
+PRTSC
+
+RUN mspaint
+
+PASTE
+KEY KEY_F,ALT
+WAIT 0.2
+KEY KEY_B
+WAIT 0.2
+KEY ENTER
+PRINTLN gotcha.png
+WAIT 0.2
+CLOSE
+
+DESKTOP
+KEY 32,CTRL
+WAIT 0.2
+KEY KEY_F10,SHIFT
+WAIT 0.4
+KEY KEY_V
+WAIT 0.4
+KEY KEY_D
+
+LED
+BREAK

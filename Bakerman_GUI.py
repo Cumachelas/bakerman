@@ -117,9 +117,22 @@ def run(i):
     output.write(cmd)
     
 def desktop(): output.write("\tDigiKeyboard.sendKeyStroke(KEY_D,MOD_GUI_LEFT); //DESKTOP\n\tDigiKeyboard.delay(" + str(std_delay) + ");\n\n")
+
+def prtsc(): output.write("\tDigiKeyboard.sendKeyStroke(70, MOD_GUI_LEFT); //PRTSC\n\tDigiKeyboard.delay(" + str(std_delay) + ");\n\n")
+
+def explorer(): output.write("\tDigiKeyboard.sendKeyStroke(KEY_E, MOD_GUI_LEFT); //EXPLORER\n\tDigiKeyboard.delay(" + str(std_delay) + ");\n\n")
+
+def paste(): output.write("\tDigiKeyboard.sendKeyStroke(KEY_V, MOD_CONTROL_LEFT); //PASTE\n\tDigiKeyboard.delay(" + str(std_delay) + ");\n\n")
+
+def save(): output.write("\tDigiKeyboard.sendKeyStroke(KEY_S, MOD_CONTROL_LEFT); //SAVE\n\tDigiKeyboard.delay(" + str(std_delay) + ");\n\n")
+
+def saveas(i):
     
-def prtsc(): output.write("\tDigiKeyboard.sendKeyStroke(KEY_D,MOD_GUI_LEFT); //DESKTOP\n\tDigiKeyboard.delay(" + str(std_delay) + ");\n\n") 
+    cmd = i.replace("SAVEAS ", "", 1)
+    cmd = re.sub(pattern="\n", repl="", string=cmd)
     
+    output.write("\tDigiKeyboard.sendKeyStroke(KEY_S, MOD_CONTROL_LEFT); //SAVEAS\n\tDigiKeyboard.delay(" + str(std_delay) + ");\n\ttDigiKeyboard.print(" + q + cmd + q + ");\n\tDigiKeyboard.sendKeyStroke(KEY_ENTER);\n\tDigiKeyboard.delay(" + str(std_delay) + ");\n\n")
+
 def text(i): 
 
     cmd = i.replace("PRINT ", "", 1)
@@ -132,11 +145,11 @@ def textln(i):
     cmd = i.replace("PRINTLN ", "", 1)
     cmd = re.sub(pattern="\n", repl="", string=cmd)
 
-    output.write("\tDigiKeyboard.println(" + q +  forGerman(cmd) + q + "); //PRINTLN\n\tDigiKeyboard.delay(" + str(std_delay) + ");\n\n")
+    output.write("\tDigiKeyboard.print(" + q +  forGerman(cmd) + q + "); //PRINTLN\n\tDigiKeyboard.sendKeyStroke(KEY_ENTER);\n\tDigiKeyboard.delay(" + str(std_delay) + ");\n\n")
 
 def wait(i):
 
-    wait_time = int(i.replace("WAIT ", "", 1))
+    wait_time = float(i.replace("WAIT ", "", 1))
 
     cmd = "\tDigiKeyboard.delay(" + str(wait_time*1000) + "); //WAIT\n\n"
     output.write(cmd)
@@ -156,16 +169,34 @@ def toggleLED():
 
 def key(i):
     
+    comb = ""
+    
     cmd = i.replace("KEY ", "", 1)
     cmd = re.sub(pattern="\n", repl="", string=cmd)
     
-    if "ENTER" in i or "RETURN" in i:
-        output.write("\tDigiKeyboard.sendKeyStroke(KEY_ENTER);\n\n")
-    elif "GUI" in i or "WIN" in i:
-        output.write("\tDigiKeyboard.sendKeyStroke(MOD_GUI_LEFT);\n\n")
-    else:
-        output.write("\tDigiKeyboard.sendKeyStroke(" + cmd + ");\n\n")
-        
+    if ", " in cmd: key_list = cmd.split(", ")
+    else: key_list = cmd.split(",")
+
+    debugLog(str(key_list))
+    
+    for key in key_list:
+        if "ENTER" in key or "RETURN" in key:
+            comb = comb + "KEY_ENTER,"
+        elif "GUI" in key or "WIN" in key:
+            comb = comb + "MOD_GUI_LEFT,"
+        elif "PRTSC" in key:
+            comb = comb + "70,"
+        elif "SHIFT" in key:
+            comb = comb + "MOD_SHIFT_LEFT,"
+        elif "ALT" in key:
+            comb = comb + "MOD_ALT_LEFT,"
+        elif "CTRL" in key or "CONTROL" in key:
+            comb = comb + "MOD_CONTROL_LEFT,"
+        else:
+            comb = comb + key + ","
+    
+    output.write("\tDigiKeyboard.sendKeyStroke(" + comb.rstrip(",") + ");\n\n")
+    
 def comment(i):
     
     cmd = i.replace("&& ", "", 1)
@@ -173,7 +204,7 @@ def comment(i):
      
 def close():
     
-    output.write("\tDigiKeyboard.sendKeyStroke(KEY_F4, MOD_ALT_LEFT); //CLOSE\n\n")
+    output.write("\tDigiKeyboard.sendKeyStroke(KEY_F4, MOD_ALT_LEFT); //CLOSE\n\tDigiKeyboard.delay(" + str(std_delay*0.75) + ");\n\n")
             
 #############################################################
 
@@ -209,7 +240,9 @@ for i in cmd_list: #execution loop
 
     if headerPresent and i == cmd_list[0]: pass
     
-    elif i == "" or i == "/n": pass
+    elif i == "\n":
+        debugLog("Empty line detected, passing")
+        pass
     
     elif "&&" in i: comment(i)
     
@@ -228,6 +261,16 @@ for i in cmd_list: #execution loop
     elif "WAIT" in i: wait(i)
     
     elif "DESKTOP" in i: desktop()
+    
+    elif "PRTSC" in i: prtsc()
+    
+    elif "PASTE" in i: paste()
+    
+    elif "SAVE" in i: save()
+    
+    elif "SAVEAS" in i: saveas()
+    
+    elif "EXPLORER" in i: explorer()
 
     elif "RUN" in i: run(i)
     

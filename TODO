@@ -1,5 +1,11 @@
 6. Hide cmd window when executing Bakerman_GUI.py - .pyw
-7. CHROME
+7. Put comments out of INO void()
+8. make "full" 3-key saveas
+9. STDELAY -> from variable
+10. round delays from floats
+11. LED comments
+12. add inline && comments
+13. make wallpaper faster
 
 
 V1.2 -> implement GUI runtime, add convertino(_allparams_) function

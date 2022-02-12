@@ -1,9 +1,0 @@
-&& Wallpaper Printscreen - 11.02.2021
-&& Takes a screenshot of the desktop, selects it as wallpaper and hides all icons
-
-WAIT 20
-LED
-WAIT 5
-
-DESKTOP
-PRTSC
