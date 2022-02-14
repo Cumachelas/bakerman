@@ -1,0 +1,39 @@
+STARTDELAY 1
+LED
+
+&& Use this Dough to send kitten mayhem upon your target!
+&& Adjust the STARTDELAY and main WAIT according to your mission
+
+LEARN start chrome /new-window 
+
+:LOOP:
+
+CMD
+PASTE
+PRINTLN www.cutt.ly/JPica6m
+RUN TASKKILL /IM cmd.exe
+WAIT 5
+
+CMD
+PASTE
+PRINTLN www.cutt.ly/DPickrW
+RUN TASKKILL /IM cmd.exe
+WAIT 5
+
+CMD
+PASTE
+PRINTLN www.cutt.ly/kPiAWnn
+RUN TASKKILL /IM cmd.exe
+WAIT 5
+
+CMD
+PASTE
+PRINTLN www.cutt.ly/rPiATZy
+RUN TASKKILL /IM cmd.exe
+WAIT 5
+
+CMD
+PASTE
+PRINTLN www.cutt.ly/QPiAZSA
+RUN TASKKILL /IM cmd.exe
+WAIT 5

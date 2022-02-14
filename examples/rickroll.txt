@@ -1,5 +1,8 @@
-&& Rickroll 1 - 11.02.2022
-WAIT 10
+STARTDELAY 1
+
+&& Never gonna give you up!
+&& Adjust the STARTDELAY according to your target
+
 LED
 WAIT 5
 LED

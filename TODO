@@ -3,9 +3,12 @@
 8. make "full" 3-key saveas
 9. STDELAY -> from variable
 10. round delays from floats
-11. LED comments
-12. add inline && comments
 13. make wallpaper faster
+14. ditch posttext
+15. implement intermediary loops (:LOOP)
+16. tooltips
+17. allow for STARTDELAY after comments
+18. clipboard saving
 
 
 V1.2 -> implement GUI runtime, add convertino(_allparams_) function

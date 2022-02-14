@@ -1,11 +1,11 @@
-# BAKERMAN GUI v1.1.0 by Svjatoslav Skabarin; Release 10.02.2022
+# BAKERMAN GUI v1.1.6 by Svjatoslav Skabarin; Release 14.02.2022
 
-# Designed for Doughscript v3, but as of v1.1.0, only certain functions are implemented
+# Designed for Doughscript v3, and as of v1.1.6, all features are implemented
 # Doughskript syntax and functions: please reference ds_readme.txt
 
 # Dependencies: InterfaceLayout.py, configparser, shutil, pysimplegui --- install with dep_install.py
 
-BAKERMAN_VERSION = "v1.1.0 (w/BakeryGUI)"
+BAKERMAN_VERSION = "v1.1.6 (w/BakeryGUI)"
 DS_VERSION = "v3"
 
 import configparser
@@ -36,11 +36,18 @@ def debugLog(log):
         logFile.write(log)
         
 def forGerman(string):
+    
     string_rep = string.replace("/", "&")
     string_rep = string_rep.replace(":", ">")
-    string_rep = string_rep.replace("y", "|")
+    string_rep = string_rep.replace("-", "ß")
+    
+    string_rep = string_rep.replace("y", "|~")
     string_rep = string_rep.replace("z", "y")
-    string_rep = string_rep.replace("|", "z")
+    string_rep = string_rep.replace("|~", "z")
+    string_rep = string_rep.replace("Y", "~|")
+    string_rep = string_rep.replace("Z", "Y")
+    string_rep = string_rep.replace("~|", "Z")
+    
     return string_rep
 
 config = configparser.ConfigParser()
@@ -101,12 +108,55 @@ output = open(OutputFilePath, "w")
 output.write("")
 output = open(OutputFilePath, "a")
 
-DoughLineCount = 0
 line = 1
+
 LED_ON = False
 errorstate = False
+forLoop = False
+voidLoop = False
 
 #output functions and their definitions:
+
+def loop(i):
+    
+    global voidLoop, forLoop, loopStart
+    
+    if ":LOOP:" in i:
+        
+        if not voidLoop:
+            debugLog("Void loop initiated")
+            voidLoop = True
+            output.write("}\n\nvoid loop(){\n\n")
+            
+        else:
+            debugLog("Void loop initiated twice, ignoring")
+            
+    elif "LOOP:" in i:
+        
+        debugLog("Beginning For-loop")
+        forLoop = True
+        loopStart = line
+        
+        n = int(i.replace("LOOP: ", "", 1))
+        output.write("\tfor (int n = 0; n < " + str(n) + "; n++){ //LOOP\n\n")
+            
+    elif ":LOOP" in i:
+        
+        debugLog("Ending For-loop")
+        forLoop = False
+            
+        output.write("}\n\n")
+        
+def cmdln(i):
+    
+    cmd = i.replace("CMDLN ", "", 1)
+    cmd = re.sub(pattern="\n", repl="", string=cmd)
+    
+    output.write("\tDigiKeyboard.sendKeyStroke(KEY_R,MOD_GUI_LEFT); //CMDLN\n\tDigiKeyboard.delay(" + str(std_delay) + ");\n\tDigiKeyboard.print(" + q + "cmd" + q + ");\n\tDigiKeyboard.sendKeyStroke(KEY_ENTER);\n\tDigiKeyboard.delay(" + str(std_delay) + ");\n\tDigiKeyboard.print(" + q + forGerman(cmd) + q + ");\n\tDigiKeyboard.sendKeyStroke(KEY_ENTER);\n\n")
+
+def cmda():
+    
+    output.write("\tDigiKeyboard.sendKeyStroke(KEY_R,MOD_GUI_LEFT); //CMD\n\tDigiKeyboard.delay(" + str(std_delay) + ");\n\tDigiKeyboard.print(" + q + "cmd" + q + ");\n\tDigiKeyboard.sendKeyStroke(KEY_ENTER);\n\tDigiKeyboard.delay(" + str(std_delay) + ");\n\n")
 
 def run(i):
 
@@ -116,6 +166,8 @@ def run(i):
     cmd = "\tDigiKeyboard.sendKeyStroke(KEY_R,MOD_GUI_LEFT); //RUN\n\tDigiKeyboard.delay(" + str(std_delay) + ");\n\tDigiKeyboard.print(" + q + forGerman(cmd) + q + ");\n\tDigiKeyboard.sendKeyStroke(KEY_ENTER);\n\tDigiKeyboard.delay(" + str(std_delay) + ");\n\n"
     output.write(cmd)
     
+def close(): output.write("\tDigiKeyboard.sendKeyStroke(KEY_F4, MOD_ALT_LEFT); //CLOSE\n\tDigiKeyboard.delay(" + str(std_delay*0.75) + ");\n\n")
+    
 def desktop(): output.write("\tDigiKeyboard.sendKeyStroke(KEY_D,MOD_GUI_LEFT); //DESKTOP\n\tDigiKeyboard.delay(" + str(std_delay) + ");\n\n")
 
 def prtsc(): output.write("\tDigiKeyboard.sendKeyStroke(70, MOD_GUI_LEFT); //PRTSC\n\tDigiKeyboard.delay(" + str(std_delay) + ");\n\n")
@@ -123,6 +175,8 @@ def prtsc(): output.write("\tDigiKeyboard.sendKeyStroke(70, MOD_GUI_LEFT); //PRT
 def explorer(): output.write("\tDigiKeyboard.sendKeyStroke(KEY_E, MOD_GUI_LEFT); //EXPLORER\n\tDigiKeyboard.delay(" + str(std_delay) + ");\n\n")
 
 def paste(): output.write("\tDigiKeyboard.sendKeyStroke(KEY_V, MOD_CONTROL_LEFT); //PASTE\n\tDigiKeyboard.delay(" + str(std_delay) + ");\n\n")
+
+def copy(): output.write("\tDigiKeyboard.sendKeyStroke(KEY_C, MOD_CONTROL_LEFT); //COPY\n\tDigiKeyboard.delay(" + str(std_delay) + ");\n\n")
 
 def save(): output.write("\tDigiKeyboard.sendKeyStroke(KEY_S, MOD_CONTROL_LEFT); //SAVE\n\tDigiKeyboard.delay(" + str(std_delay) + ");\n\n")
 
@@ -132,6 +186,13 @@ def saveas(i):
     cmd = re.sub(pattern="\n", repl="", string=cmd)
     
     output.write("\tDigiKeyboard.sendKeyStroke(KEY_S, MOD_CONTROL_LEFT); //SAVEAS\n\tDigiKeyboard.delay(" + str(std_delay) + ");\n\ttDigiKeyboard.print(" + q + cmd + q + ");\n\tDigiKeyboard.sendKeyStroke(KEY_ENTER);\n\tDigiKeyboard.delay(" + str(std_delay) + ");\n\n")
+
+def learn(i):
+    
+    t = i.replace("LEARN ", "", 1)
+    t = re.sub(pattern="\n", repl="", string=t)
+    
+    output.write("\tDigiKeyboard.sendKeyStroke(0, MOD_GUI_LEFT); //CLIPBOARD LEARN\n\tDigiKeyboard.delay(" + str(std_delay*0.5) + ");\n\tDigiKeyboard.print(" + q + forGerman(t) + q + ");\n\tDigiKeyboard.sendKeyStroke(KEY_A,MOD_CONTROL_LEFT);\n\tDigiKeyboard.sendKeyStroke(KEY_C,MOD_CONTROL_LEFT);\n\tDigiKeyboard.sendKeyStroke(41);\n\n")
 
 def text(i): 
 
@@ -145,7 +206,7 @@ def textln(i):
     cmd = i.replace("PRINTLN ", "", 1)
     cmd = re.sub(pattern="\n", repl="", string=cmd)
 
-    output.write("\tDigiKeyboard.print(" + q +  forGerman(cmd) + q + "); //PRINTLN\n\tDigiKeyboard.sendKeyStroke(KEY_ENTER);\n\tDigiKeyboard.delay(" + str(std_delay) + ");\n\n")
+    output.write("\tDigiKeyboard.print(" + q +  forGerman(cmd) + q + "); //PRINTLN\n\tDigiKeyboard.sendKeyStroke(KEY_ENTER);\n\n")
 
 def wait(i):
 
@@ -159,10 +220,10 @@ def toggleLED():
     global LED_ON
 
     if LED_ON:
-        cmd = "\tdigitalWrite(" + str(LED_PIN) + ", LOW); //LED ON\n\n"
+        cmd = "\tdigitalWrite(" + str(LED_PIN) + ", LOW); //LED OFF\n\n"
         LED_ON = not LED_ON
     elif not LED_ON:
-        cmd = "\tdigitalWrite(" + str(LED_PIN) + ", HIGH); //LED OFF\n\n"
+        cmd = "\tdigitalWrite(" + str(LED_PIN) + ", HIGH); //LED ON\n\n"
         LED_ON = not LED_ON
 
     output.write(cmd)
@@ -201,10 +262,6 @@ def comment(i):
     
     cmd = i.replace("&& ", "", 1)
     output.write("\t// " + re.sub(pattern="\n", repl="", string=cmd) + "\n\n")
-     
-def close():
-    
-    output.write("\tDigiKeyboard.sendKeyStroke(KEY_F4, MOD_ALT_LEFT); //CLOSE\n\tDigiKeyboard.delay(" + str(std_delay*0.75) + ");\n\n")
             
 #############################################################
 
@@ -249,6 +306,8 @@ for i in cmd_list: #execution loop
     elif "BREAK" in i:
         debugLog("BREAK called, stopped encoding")
         break
+    
+    elif "LOOP" in i: loop(i)
 
     elif "LED" in i: toggleLED()
     
@@ -266,6 +325,10 @@ for i in cmd_list: #execution loop
     
     elif "PASTE" in i: paste()
     
+    elif "COPY" in i: copy()
+    
+    elif "LEARN" in i: learn(i)
+    
     elif "SAVE" in i: save()
     
     elif "SAVEAS" in i: saveas()
@@ -273,6 +336,10 @@ for i in cmd_list: #execution loop
     elif "EXPLORER" in i: explorer()
 
     elif "RUN" in i: run(i)
+    
+    elif "CMDLN" in i: cmdln(i)
+    
+    elif "CMD" in i: cmda()
     
     elif "CLOSE" in i: close()
     
@@ -286,7 +353,8 @@ for i in cmd_list: #execution loop
         
     line = line + 1
 
-output.write(posttext.read())
+if voidLoop: output.write("}")
+else: output.write(posttext.read())
 
 output.close()
 posttext.close()

@@ -1,6 +1,7 @@
 && Wallpaper Printscreen - 12.02.2021
 && Takes a screenshot of the desktop, selects it as wallpaper and hides all icons 
 && Executes in under 4 seconds (tested on 220ms execution timing)
+&& Creates a gotcha.png file in the User directory -> delete after each test
 
 LED
 

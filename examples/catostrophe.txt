@@ -1,0 +1,27 @@
+STARTDELAY 1
+LED
+
+&& Use this Dough to send kitten mayhem upon your target!
+&& Adjust the STARTDELAY and WAITs according to your mission
+
+:LOOP:
+
+CMD
+RUN www.cutt.ly/JPica6m
+WAIT 5
+
+CMD
+RUN www.cutt.ly/DPickrW
+WAIT 5
+
+CMD
+RUN www.cutt.ly/kPiAWnn
+WAIT 5
+
+CMD
+RUN www.cutt.ly/rPiATZy
+WAIT 5
+
+CMD
+RUN www.cutt.ly/QPiAZSA
+WAIT 5
