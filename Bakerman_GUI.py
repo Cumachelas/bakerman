@@ -210,8 +210,9 @@ def textln(i):
 
 def wait(i):
 
-    wait_time = float(i.replace("WAIT ", "", 1))
-
+    cmd = i.replace("WAIT ", "", 1)
+    wait_time = float(re.sub(pattern="\n", repl="", string=cmd))
+    
     cmd = "\tDigiKeyboard.delay(" + str(wait_time*1000) + "); //WAIT\n\n"
     output.write(cmd)
 
