@@ -1,0 +1,6 @@
+&& Jiggles the mouse every 20 seconds
+&& Needs "Init first keystroke" to work
+
+:LOOP:
+JIGGLE
+WAIT 20

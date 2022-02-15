@@ -34,7 +34,7 @@ def debugLog(log):
         timeDelta = time.time() - start_time
         log = str(round(timeDelta, 2)) + "s " + log + "\n"
         logFile.write(log)
-        
+
 def forGerman(string):
     
     string_rep = string.replace("/", "&")
@@ -101,7 +101,7 @@ if doDebug: #debug setup
     LogFilePath = "logs/" + str(int(time.time())) + ".txt"
     logFile = open(LogFilePath, "a")
 
-pretext = "#include<DigiKeyboard.h>\n\nvoid setup(){\n\n"
+pretext = "#include<DigiKeyboard.h>\n#include<DigiMouse.h>\n\nvoid setup(){\n\n"
 posttext = open("config/posttext.conf", "r")
 
 output = open(OutputFilePath, "w")
@@ -114,6 +114,9 @@ LED_ON = False
 errorstate = False
 forLoop = False
 voidLoop = False
+
+jiggleForm = "Line"
+jigFactor = 5
 
 #output functions and their definitions:
 
@@ -263,6 +266,13 @@ def comment(i):
     
     cmd = i.replace("&& ", "", 1)
     output.write("\t// " + re.sub(pattern="\n", repl="", string=cmd) + "\n\n")
+    
+def jiggle():
+    
+    global jiggleForm
+    
+    if jiggleForm == "Line":
+        output.write("\tDigiMouse.moveY(10); //JIGGLER\n\tDigiMouse.delay(" + str(std_delay*jigFactor) + ");\n\tDigiMouse.moveY(-10);\n\tDigiMouse.delay(" + q + str(std_delay*jigFactor) + q + ");\n\n")
             
 #############################################################
 
@@ -290,7 +300,7 @@ if "STARTDELAY" in cmd_list[0] and not errorstate: #header-init
     
     if startdelay > 0: output.write("\tdelay(" + str(math.floor(startdelay*1000)) + "); // STARTDELAY\n\n")
     
-if INITIALIZE and not errorstate: output.write("\tDigiKeyboard.sendKeyStroke(0);\n\n")
+if INITIALIZE and not errorstate: output.write("\tDigiKeyboard.sendKeyStroke(0);\n\tDigiMouse.begin();\n\n")
     
 for i in cmd_list: #execution loop
     
@@ -343,6 +353,8 @@ for i in cmd_list: #execution loop
     elif "CMD" in i: cmda()
     
     elif "CLOSE" in i: close()
+    
+    elif "JIGGLE" in i: jiggle()
     
     elif "STARTDELAY" in i:
         debugLog("STARTDELAY encountered out of header, ignoring")
