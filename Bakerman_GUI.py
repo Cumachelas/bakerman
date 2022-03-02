@@ -1,12 +1,14 @@
-# BAKERMAN GUI v1.1.6 by Svjatoslav Skabarin; Release 14.02.2022
+# BAKERMAN GUI v1.1.9 by Svjatoslav Skabarin; Release 02.03.2022
 
-# Designed for Doughscript v3, and as of v1.1.6, all features are implemented
+# Designed for Doughscript v3.2, and as of v1.1.9, all features except for the MOUSE function are implemented
 # Doughskript syntax and functions: please reference ds_readme.txt
+
+# COMING IN RELEASE v1.2 -> full mouse support; German layout overhaul; instantaneous Digispark boot; major bugfixes
 
 # Dependencies: InterfaceLayout.py, configparser, shutil, pysimplegui --- install with dep_install.py
 
-BAKERMAN_VERSION = "v1.1.6 (w/BakeryGUI)"
-DS_VERSION = "v3"
+BAKERMAN_VERSION = "v1.1.9 (w/BakeryGUI)"
+DS_VERSION = "v3.2"
 
 import configparser
 import subprocess as sub
@@ -101,7 +103,6 @@ if doDebug: #debug setup
     LogFilePath = "logs/" + str(int(time.time())) + ".txt"
     logFile = open(LogFilePath, "a")
 
-pretext = "#include<DigiKeyboard.h>\n#include<DigiMouse.h>\n\nvoid setup(){\n\n"
 posttext = open("config/posttext.conf", "r")
 
 output = open(OutputFilePath, "w")
@@ -117,6 +118,8 @@ voidLoop = False
 
 jiggleForm = "Line"
 jigFactor = 5
+
+needsMouse = False
 
 #output functions and their definitions:
 
@@ -278,17 +281,25 @@ def jiggle():
 
 debugLog("Programm initialized")
 
-try:
-    dough = open(InputFilePath)
+try: dough = open(InputFilePath)
+    
 except FileNotFoundError:
+    
     debugLog("Source file not found")
     errorstate = True
     cmd_list = ["0"] #making sure, that STARTDELAY has a list to check
+    
 else:
+    
     debugLog("File opened succesfully...")
     cmd_list = dough.readlines()
     totalLines = list.__len__(cmd_list)
-    output.write(pretext)
+    
+    if "JIGGLE" in dough or "MOUSE" in dough: #add all functions that use DigiMouse.h here
+        needsMouse = True
+        output.write("#include<DigiKeyboard.h>\n#include<DigiMouse.h>\n\nvoid setup(){\n\n")
+    else:
+        output.write("#include<DigiKeyboard.h>\n\nvoid setup(){\n\n")
 
 if "STARTDELAY" in cmd_list[0] and not errorstate: #header-init
     
@@ -300,7 +311,10 @@ if "STARTDELAY" in cmd_list[0] and not errorstate: #header-init
     
     if startdelay > 0: output.write("\tdelay(" + str(math.floor(startdelay*1000)) + "); // STARTDELAY\n\n")
     
-if INITIALIZE and not errorstate: output.write("\tDigiKeyboard.sendKeyStroke(0);\n\tDigiMouse.begin();\n\n")
+if INITIALIZE and not errorstate: 
+    
+    if needsMouse: output.write("\tDigiKeyboard.sendKeyStroke(0);\n\tDigiMouse.begin();\n\n")
+    else: output.write("\tDigiKeyboard.sendKeyStroke(0);\n\n")  
     
 for i in cmd_list: #execution loop
     

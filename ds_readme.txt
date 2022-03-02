@@ -29,6 +29,13 @@ PRINTLN str[text]
 -> Types the given text and presses Enter. Useful for executing commands.
 -> Does NOT have built-in automatic timing.
 
+JIGGLE
+-> moves the mouse for a shot time, just enough for the machine to wake.
+
+MOUSE str[form],int[time]
+-> Moves the mouse in the given form and for the given amount of time.
+-> NOT IMPLEMENTED as of v1.1.9 (coming in v1.2)
+
 CMDLN str[command]
 -> Executes a given command in the Command Promt.
 

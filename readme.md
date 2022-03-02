@@ -1,5 +1,7 @@
 **Kooky Bakerman by @Cumachelas**
 
+COMING IN RELEASE v1.2 -> full mouse support; German layout overhaul; instantaneous Digispark boot; major bugfixes
+
 
 DON'T USE THE EXECUTABLE DISTRIBUTION YET! 
 _(testing purposes only)_
@@ -22,5 +24,5 @@ Use with Digispark (16MHz):
   6. Upload the generated .ino file and THEN plug in your board (you will see a prompt from micronucleus)
   7. Have fun!
 
-**Doughskript V3 - Syntax**
+**Doughskript V3.2 - Syntax**
 __-> see ds_readme.txt__
